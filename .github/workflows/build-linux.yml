@@ -178,6 +178,7 @@ jobs:
     needs: [check-version, comment-start]
     if: always() && needs.check-version.outputs.should_build == 'true'
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     timeout-minutes: 120
     env:
       CPM_SOURCE_CACHE: ${{ github.workspace }}/.cpm-cache
@@ -188,16 +189,19 @@ jobs:
         include:
           - name: "Citron Build (Normal x86_64)"
             os: ubuntu-latest
+            container: archlinux:latest
             artifact_name: "Artifacts_x86_64"
             script_suffix: ""
             arch_arg: ""
           - name: "Citron Build (Optimized x86_64)"
             os: ubuntu-latest
+            container: archlinux:latest
             artifact_name: "Artifacts_v3"
             script_suffix: "_v3"
             arch_arg: "--arch v3"
           - name: "Citron Build (aarch64)"
             os: ubuntu-24.04-arm
+            container: archlinux:latest
             artifact_name: "Artifacts_aarch64"
             script_suffix: ""
             arch_arg: ""
@@ -207,6 +211,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Install Base Container Tools
+        run: pacman -Sy --needed --noconfirm git
 
       - name: Clone Citron Source
         shell: bash
